@@ -17,73 +17,64 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 """Activity helper classes."""
-from sugar.activity import activity
+from sugar3.activity import activity
+from sugar3.graphics.toolbarbox import ToolbarBox
 
 # Set to false to hide terminal and auto quit on exit
 DEBUG_TERMINAL = False
 
+
 class VteActivity(activity.Activity):
     """Activity subclass built around the Vte terminal widget."""
+
     def __init__(self, handle):
-        import gtk, pango, platform, sys
-        from ctypes import cdll
-
-        if platform.machine().startswith('arm'):
-            pass # FIXME
-        else:
-            if platform.architecture()[0] == '64bit':
-                vte_path = "x86-64"
-            else:
-                vte_path = "x86"
-            vte = cdll.LoadLibrary("lib/%s/libvte.so.9" % vte_path)
-        sys.path.append("lib/%s" % vte_path)
-
-        import vte
+        from gi.repository import Gtk
+        from gi.repository import Gdk
+        from gi.repository import GLib
+        from gi.repository import Pango
+        from gi.repository import Vte
 
         super(VteActivity, self).__init__(handle, create_jobject=False)
         self.__source_object_id = None
 
         # creates vte widget
-        self._vte = vte.Terminal()
+        self._vte = Vte.Terminal()
 
         if DEBUG_TERMINAL:
-            toolbox = activity.ActivityToolbox(self)
-            toolbar = toolbox.get_activity_toolbar()
-            self.set_toolbox(toolbox)
+            toolbox = ToolbarBox(self)
+            toolbar = toolbox.toolbar
+            self.set_toolbar_box(toolbox)
 
-            self._vte.set_size(30,5)
+            self._vte.set_size(30, 5)
             self._vte.set_size_request(200, 300)
             font = 'Monospace 10'
-            self._vte.set_font(pango.FontDescription(font))
-            self._vte.set_colors(gtk.gdk.color_parse ('#E7E7E7'),
-                                 gtk.gdk.color_parse ('#000000'),
+            self._vte.set_font(Pango.FontDescription(font))
+            self._vte.set_colors(Gdk.color_parse('#E7E7E7'),
+                                 Gdk.color_parse('#000000'),
                                  [])
 
-            vtebox = gtk.HBox()
-            vtebox.pack_start(self._vte)
-            vtesb = gtk.VScrollbar(self._vte.get_adjustment())
-            vtesb.show()
+            vtebox = Gtk.HBox()
+            vtebox.pack_start(self._vte, True, True, 0)
+            vtesb = Gtk.VScrollbar()
             vtebox.pack_start(vtesb, False, False, 0)
             self.set_canvas(vtebox)
 
-            toolbox.show()
-            self.show_all()
-            toolbar.share.hide()
-            toolbar.keep.hide()
+            toolbox.show_all()
+            vtebox.show_all()
 
         # now start subprocess.
         self._vte.connect('child-exited', self.on_child_exit)
         self._vte.grab_focus()
         bundle_path = activity.get_bundle_path()
-        self._pid = self._vte.fork_command \
-            (command='/bin/sh',
-             argv=['/bin/sh','-c',
-             'python %s/LemonadeStand.py --width=1200 --height=900 --font=36' % bundle_path],
-             envv=["PYTHONPATH=%s/library" % bundle_path],
-             directory=bundle_path)
-    def on_child_exit(self, widget):
+        self._pid = self._vte.spawn_sync(
+            Vte.PtyFlags.DEFAULT, bundle_path, [
+                '/bin/sh', '-c', 'python %s/LemonadeStand.py --width=1200 --height=900 --font=36' %
+                bundle_path], [
+                "PYTHONPATH=%s/library" %
+                bundle_path], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None)
+
+    def on_child_exit(self, widget, status):
         """This method is invoked when the user's script exits."""
         if not DEBUG_TERMINAL:
             import sys
             sys.exit()
-

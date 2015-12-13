@@ -114,7 +114,7 @@ RECIPES = {
 }
 
 import locale
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 def format_money(value):
     return locale.currency( value / 100.0, grouping=True )
 

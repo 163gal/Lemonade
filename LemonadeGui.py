@@ -37,7 +37,7 @@ class LemonadeGui(GameEngineElement):
         self.__font = self.game_engine.get_object('font')
         self.add_to_engine()
 
-        self.game_mode = 0
+        self.game_mode = 2
 
         self.__input_keys = [ITEMS.keys(), CURRENCY.keys(), [None]]
         self.__input_mode = [0, 0, 0]
@@ -249,16 +249,14 @@ class LemonadeGui(GameEngineElement):
         """
         
         if event.type == KEYDOWN:
+            main = self.game_engine.get_object('main')
+            if main.splash:
+                main.splash = not main.splash
+                self.game_engine.set_dirty()
+                return
 
             if event.key in [K_RETURN, K_KP1]:
                 # Process Data
-
-                main = self.game_engine.get_object('main')
-
-                if main.splash:
-                    main.splash = not main.splash
-                    return
-
                 item_list = {}
                 for i in range(0, len(self.__input_keys[self.game_mode])):
                     item_list[self.__input_keys[self.game_mode][i]] = \
@@ -297,13 +295,13 @@ class LemonadeGui(GameEngineElement):
                                     self.game_mode]] = handle
 
             # Go to the next field
-            elif event.key in [K_TAB, K_DOWN, K_RIGHT, K_KP2, K_KP6]:
+            elif event.key in [K_TAB, K_RIGHT, K_KP2, K_KP6]:
                 self.__input_mode[self.game_mode] = \
                     (self.__input_mode[self.game_mode] + 1) %\
                         len(self.__input_keys[self.game_mode])
 
             # Go up to previous field
-            elif event.key in [K_UP, K_LEFT, K_KP4, K_KP8]:
+            elif event.key in [K_LEFT, K_KP4, K_KP8]:
                 self.__input_mode[self.game_mode] = \
                     (self.__input_mode[self.game_mode] - 1) %\
                         len(self.__input_keys[self.game_mode])
@@ -324,7 +322,7 @@ class LemonadeGui(GameEngineElement):
                     self.game_mode]] = handle
 
             # Increment
-            elif event.key == K_KP9:
+            elif event.key in [K_UP, K_KP9]:
 
                 handle = int(self.__input_string[self.game_mode]\
                     [self.__input_mode[self.game_mode]])
@@ -335,7 +333,7 @@ class LemonadeGui(GameEngineElement):
                     self.game_mode]] = "%s" % handle
 
             # Decrement
-            elif event.key == K_KP3:
+            elif event.key in [K_DOWN, K_KP3]:
 
                 handle = int(self.__input_string[self.game_mode]\
                     [self.__input_mode[self.game_mode]])
