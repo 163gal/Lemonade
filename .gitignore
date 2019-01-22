@@ -1,1 +1,5 @@
 *.py[cod]
+*.xo
+*.tar.bz2
+locale
+dist

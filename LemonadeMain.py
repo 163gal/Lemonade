@@ -147,8 +147,8 @@ class LemonadeMain:
                     ITEMS[item]['name'])
 
             else:
-                self.add_msg(_("Bought %d units of %s.") % \
-                    (items[item], ITEMS[item]['name']))
+                self.add_msg(_("Bought %(number)d units of %(item)s.") % \
+                    {'number':items[item], 'item':ITEMS[item]['name']})
 
         # Calculate how many can be bought
         inventory_hold = []
@@ -173,8 +173,8 @@ class LemonadeMain:
 
         self.__resources['last_income'] = sales * self.__resources['price']
 
-        self.add_msg(_("Sold %d cups, at %s each") % \
-                (sales, format_money(self.__resources['price'])))
+        self.add_msg(_("Sold %(number)d cups, at %(price)s each") % \
+                {'number':sales, 'price':format_money(self.__resources['price'])})
 
         # Show profit and expenses if the difficuly is less than impossible
         if self.__difficulty < DIFFICULTY.index("Impossible"):
