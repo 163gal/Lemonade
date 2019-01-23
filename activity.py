@@ -19,6 +19,7 @@
 """Activity helper classes."""
 from sugar3.activity import activity
 from sugar3.graphics.toolbarbox import ToolbarBox
+import pygame
 
 # Set to false to hide terminal and auto quit on exit
 DEBUG_TERMINAL = False
@@ -61,6 +62,12 @@ class VteActivity(activity.Activity):
 
             toolbox.show_all()
             vtebox.show_all()
+        
+        #Initialize pygame module
+        pygame.display.init()
+        info = pygame.display.Info()
+        width = info.current_w
+        height = info.current_h
 
         # now start subprocess.
         self._vte.connect('child-exited', self.on_child_exit)
@@ -68,8 +75,8 @@ class VteActivity(activity.Activity):
         bundle_path = activity.get_bundle_path()
         self._pid = self._vte.spawn_sync(
             Vte.PtyFlags.DEFAULT, bundle_path, [
-                '/bin/sh', '-c', 'python %s/LemonadeStand.py --width=1200 --height=900 --font=36' %
-                bundle_path], [
+                '/bin/sh', '-c', 'python %s/LemonadeStand.py --width=%d --height=%d --font=36' %
+                (bundle_path, width, height)], [
                 "PYTHONPATH=%s/library" %
                 bundle_path], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None)
 

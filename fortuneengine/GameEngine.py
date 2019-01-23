@@ -29,7 +29,7 @@ class GameEngine(object):
     """
     instance = None
 
-    def __init__(self, width=1200, height=900, always_draw=False,
+    def __init__(self, width, height, always_draw=False,
                  fps_cap=15, version=False, title="FortuneEngine"):
         """
         Constructor for the game engine.
