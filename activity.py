@@ -29,10 +29,12 @@ class VteActivity(activity.Activity):
     """Activity subclass built around the Vte terminal widget."""
 
     def __init__(self, handle):
+        import gi
         from gi.repository import Gtk
         from gi.repository import Gdk
         from gi.repository import GLib
         from gi.repository import Pango
+        gi.require_version('Vte', '2.91')
         from gi.repository import Vte
 
         super(VteActivity, self).__init__(handle, create_jobject=False)
