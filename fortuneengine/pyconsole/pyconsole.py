@@ -89,7 +89,7 @@ def balanced(t):
 class Console:
     def __init__(self, screen, rect, functions={}, key_calls={}, vars={}, syntax={}):
         if not pygame.display.get_init():
-            raise pygame.error, "Display not initialized. Initialize the display before creating a Console"
+            raise pygame.error("Display not initialized. Initialize the display before creating a Console")
 
         if not pygame.font.get_init():
             pygame.font.init()
@@ -373,7 +373,7 @@ class Console:
                 tokens = self.tokenize(assign.group('value'))
             else:
                 tokens = self.tokenize(text)
-        except ParseError, e:
+        except ParseError as e:
             self.output(r'At Token: "%s"' % e.at_token())
             return;
 
@@ -410,19 +410,19 @@ class Console:
         '''\
         Sets the value of a variable
         '''
-        if self.user_vars.has_key(name) or not self.__dict__.has_key(name):
+        if name in self.user_vars or name not in self.__dict__:
             self.user_vars.update({name:value})
             self.user_namespace.update(self.user_vars)
-        elif self.__dict__.has_key(name):
+        elif name in self.__dict__:
             self.__dict__.update({name:value})
 
     def getvar(self, name):
         '''\
         Gets the value of a variable, this is useful for people that want to access console variables from within their game
         '''
-        if self.user_vars.has_key(name) or not self.__dict__.has_key(name):
+        if name in self.user_vars or name not in self.__dict__:
             return self.user_vars[name]
-        elif self.__dict__.has_key(name):
+        elif name in self.__dict__:
             return self.__dict__[name]
 
     def setvars(self, vars):
@@ -534,7 +534,7 @@ class Console:
                     if event.key in range(256) and chr(event.key) in self.key_calls:
                         self.key_calls[chr(event.key)]()
                 else:
-                    char = str(event.unicode)
+                    char = str(event.str)
                     self.c_in = self.str_insert(self.c_in, char)
         return True
 
@@ -545,17 +545,17 @@ class Console:
         tok = tok.strip("$")
         try:
             tmp = eval(tok, self.__dict__, self.user_namespace)
-        except SyntaxError, strerror:
+        except SyntaxError as strerror:
             self.output("SyntaxError: " + str(strerror))
-            raise ParseError, tok
-        except TypeError, strerror:
+            raise ParseError(tok)
+        except TypeError as strerror:
             self.output("TypeError: " + str(strerror))
-            raise ParseError, tok
-        except NameError, strerror:
+            raise ParseError(tok)
+        except NameError as strerror:
             self.output("NameError: " + str(strerror))
         except:
             self.output("Error:")
-            raise ParseError, tok
+            raise ParseError(tok)
         else:
             return tmp
 
@@ -596,7 +596,7 @@ class Console:
                     if (i + t_count) < len(tokens):
                         cmd.append(self.convert_token(val))
                     else:
-                        raise ParseError, val
+                        raise ParseError(val)
             else:
                 cmd.append(val)
             i += t_count + 1
@@ -623,8 +623,8 @@ class Console:
         if args:
             items = [(i,self.func_calls[i]) for i in args if i  in self.func_calls]
             for i,v in items:
-                out = i + ": Takes %d arguments. " % (v.func_code.co_argcount - (v.func_code.co_varnames[0] is "self"))
-                doc = v.func_doc
+                out = i + ": Takes %d arguments. " % (v.__code__.co_argcount - (v.__code__.co_varnames[0] is "self"))
+                doc = v.__doc__
                 if doc:
                     out += textwrap.dedent(doc)
                 tmp_indent = self.txt_wrapper.subsequent_indent
@@ -632,6 +632,6 @@ class Console:
                 self.output(out)
                 self.txt_wrapper.subsequent_indent = tmp_indent
         else:
-            out = "Available commands: " + str(self.func_calls.keys()).strip("[]")
+            out = "Available commands: " + str(list(self.func_calls.keys())).strip("[]")
             self.output(out)
             self.output(r'Type "help command-name" for more information on that command')

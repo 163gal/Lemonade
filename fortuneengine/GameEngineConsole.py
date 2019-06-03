@@ -13,7 +13,7 @@
 #
 #    Author: Justin Lewis  <jlew.blackout@gmail.com>
 
-from pyconsole.pyconsole import Console
+from .pyconsole.pyconsole import Console
 
 
 class GameEngineConsole(Console):

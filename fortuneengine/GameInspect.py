@@ -109,12 +109,12 @@ class GameInspect(object):
         """
         try:
             obj, last, last_token = self.drilldown_object(objectname)
-        except Exception, detail:
+        except Exception as detail:
             return str(detail)
 
         try:
             setattr(last, last_token, eval(str(statement)))
-        except Exception, detail:
+        except Exception as detail:
             return str(detail)
 
     def set_str(self, objectname, val):
@@ -129,7 +129,7 @@ class GameInspect(object):
         """
         try:
             obj, last, last_token = self.drilldown_object(objectname)
-        except Exception, detail:
+        except Exception as detail:
             return str(detail)
 
         setattr(last, last_token, val)
@@ -148,7 +148,7 @@ class GameInspect(object):
         """
         try:
             obj, last, last_token = self.drilldown_object(objectname)
-        except Exception, detail:
+        except Exception as detail:
             return str(detail)
 
         try:
@@ -167,7 +167,7 @@ class GameInspect(object):
         try:
             obj, last, last_token = self.drilldown_object(objectname)
 
-        except Exception, detail:
+        except Exception as detail:
             return str(detail)
 
         classname = obj.__class__.__name__
@@ -176,7 +176,7 @@ class GameInspect(object):
         if hasattr(obj, "__dict__"):
             attribute_list = "Attributes:"
             attributes = obj.__dict__
-            for attribute_key in attributes.keys():
+            for attribute_key in list(attributes.keys()):
                 attribute_list = "%s\n\t%s:%s" % (attribute_list,
                                  attribute_key, str(attributes[attribute_key]))
 
@@ -211,7 +211,7 @@ class GameInspect(object):
         elif hasattr(obj, "keys"):
             attribute_list = "Dictionary Items:"
 
-            for d_obj in obj.keys():
+            for d_obj in list(obj.keys()):
                 attribute_list = "%s\n\t%s:%s" % (attribute_list, d_obj,
                                                   str(obj[d_obj]))
 

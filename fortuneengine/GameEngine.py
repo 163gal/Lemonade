@@ -15,10 +15,10 @@
 
 import pygame
 from time import time
-from GameEngineConsole import GameEngineConsole
-from GameInspect import GameInspect
-from DrawableFontObject import DrawableFontObject
-from Scene import Scene
+from .GameEngineConsole import GameEngineConsole
+from .GameInspect import GameInspect
+from .DrawableFontObject import DrawableFontObject
+from .Scene import Scene
 
 
 class GameEngine(object):
@@ -135,9 +135,9 @@ class GameEngine(object):
                 self.__active_event_timers_tick.append(time)
                 pygame.time.set_timer(pygame.USEREVENT + avail_timer, time)
             else:
-                print "ERROR TIMER IN LIST"
+                print("ERROR TIMER IN LIST")
         else:
-            print "Ran out of timers :("
+            print("Ran out of timers :(")
             self.stop_event_loop()
 
     def stop_event_timer(self, function_cb):

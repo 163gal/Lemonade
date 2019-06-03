@@ -49,7 +49,7 @@ class LemonadeMain:
         }
 
         # Populate resources with item keys
-        for item_key in ITEMS.keys():
+        for item_key in list(ITEMS.keys()):
             self.__resources[item_key] = []
 
         self.__weather = 1
@@ -79,7 +79,7 @@ class LemonadeMain:
     @property
     def resource_list(self):
         resources = {}
-        for item_key in ITEMS.keys():
+        for item_key in list(ITEMS.keys()):
             resources[item_key] = self.count_item(item_key)
         return resources
 
@@ -152,7 +152,7 @@ class LemonadeMain:
 
         # Calculate how many can be bought
         inventory_hold = []
-        for item_key in ITEMS.keys():
+        for item_key in list(ITEMS.keys()):
             if self.recipe(item_key) == 0:
                 continue
             inventory_hold.append(\
@@ -168,7 +168,7 @@ class LemonadeMain:
                 sales = int(sales * .6)
 
         # Remove items required per cup sold
-        for item_key in ITEMS.keys():
+        for item_key in list(ITEMS.keys()):
             self.remove_item(item_key, sales * self.recipe(item_key))
 
         self.__resources['last_income'] = sales * self.__resources['price']
@@ -309,7 +309,7 @@ class LemonadeMain:
         Decays items and removes expired items.
         """
         # Loop through all items
-        for item_key in ITEMS.keys():
+        for item_key in list(ITEMS.keys()):
             new_list = []
 
             # Loops through all items stored in item list
@@ -350,7 +350,7 @@ class LemonadeMain:
                             are required to make the optimum change
         @return:            Returns true if they pass the mini-game
         """
-        currency_values = sorted(CURRENCY.items(), key=itemgetter(1),
+        currency_values = sorted(list(CURRENCY.items()), key=itemgetter(1),
                                  reverse=True)
 
         # Set previous_value to target so it always accepts the first key

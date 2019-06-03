@@ -39,7 +39,7 @@ class LemonadeGui(GameEngineElement):
 
         self.game_mode = 2
 
-        self.__input_keys = [ITEMS.keys(), CURRENCY.keys(), [None]]
+        self.__input_keys = [list(ITEMS.keys()), list(CURRENCY.keys()), [None]]
         self.__input_mode = [0, 0, 0]
         self.__input_string = []
         for key in self.__input_keys:
@@ -108,7 +108,7 @@ class LemonadeGui(GameEngineElement):
         icon_width = ingredient_block.get_width() / len(items)
         j = icon_size / 3
         render_top = 15 + icon_size
-        for name, count in items.items():
+        for name, count in list(items.items()):
             icon = image.load("images/icon-%s.gif" % name).convert()
             icon = transform.scale(icon, (icon_size, icon_size))
             ingredient_block.blit(icon, (j, 10))
@@ -308,7 +308,7 @@ class LemonadeGui(GameEngineElement):
 
             # Text input, only handles numbers (ascii 48 - 58)
             elif event.key >= 48 and event.key <= 58:
-                key = str(event.unicode)
+                key = str(event.str)
 
                 handle = self.__input_string[self.game_mode]\
                     [self.__input_mode[self.game_mode]]

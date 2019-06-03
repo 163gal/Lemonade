@@ -1,5 +1,5 @@
 import pygame
-from DrawableObject import DrawableObject
+from .DrawableObject import DrawableObject
 
 class DynamicDrawableObject(DrawableObject, pygame.sprite.Sprite):
 
