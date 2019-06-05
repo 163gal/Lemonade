@@ -59,7 +59,7 @@ class GameInspect(object):
 
         except KeyError:
             raise Exception("%s is not registered with the game engine" %
-                   object_tokens[0])
+                            object_tokens[0])
 
         # Handles dot notation for sub modules by looping through the tokens
         for token in object_tokens[1:]:
@@ -71,7 +71,7 @@ class GameInspect(object):
                 obj = getattr(obj, dict_token[0])
                 last_token = dict_token[0]
 
-            except:
+            except BaseException:
                 raise Exception("Error finding member element: %s" % token)
 
             # Handles dictionaries
@@ -81,14 +81,14 @@ class GameInspect(object):
                     # Try list notation first then try dictionary notation
                     try:
                         key = int(d_token)
-                    except:
+                    except BaseException:
                         key = d_token
 
                     try:
                         last = obj
                         obj = obj[key]
                         last_token = key
-                    except:
+                    except BaseException:
                         raise Exception("Unable to find %s" % key)
 
                 else:
@@ -153,7 +153,7 @@ class GameInspect(object):
 
         try:
             setattr(last, last_token, int(val))
-        except:
+        except BaseException as detail:
             return str(detail)
 
     def inspect_object(self, objectname):
@@ -177,8 +177,9 @@ class GameInspect(object):
             attribute_list = "Attributes:"
             attributes = obj.__dict__
             for attribute_key in list(attributes.keys()):
-                attribute_list = "%s\n\t%s:%s" % (attribute_list,
-                                 attribute_key, str(attributes[attribute_key]))
+                attribute_list = "%s\n\t%s:%s" % (
+                    attribute_list, attribute_key,
+                    str(attributes[attribute_key]))
 
             # Inspect the object for all its methods
             method_list = inspect.getmembers(obj, inspect.ismethod)

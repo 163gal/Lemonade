@@ -49,7 +49,7 @@ class GameEngine(object):
         GameEngine.instance = self
         pygame.init()
         pygame.mouse.set_visible(False)
-        self.__version = version #true is new, false is old
+        self.__version = version  # true is new, false is old
 
         # Window Settings
         self.width = width
@@ -73,7 +73,6 @@ class GameEngine(object):
         self.__event_cb = []
         self.__draw_lst = []
         self.__object_hold = {}
-
 
         # Game Timers
         self.__active_event_timers = []
@@ -169,7 +168,7 @@ class GameEngine(object):
         i = 0
         for timer_item in self.__active_event_timers:
             timer_list += "\t%d: %d\n" % (timer_item,
-                          self.__active_event_timers_tick[i])
+                                          self.__active_event_timers_tick[i])
             i = i + 1
 
         return timer_list
@@ -227,7 +226,7 @@ class GameEngine(object):
                 # Print Frame Rate
                 if self.__showfps:
                     self.__fps.changeText('FPS: %d' % self.clock.get_fps(),
-                                                      (255, 255, 255))
+                                          (255, 255, 255))
                 else:
                     self.__fps.changeText('')
                 self.__scene.update(tick_time)
@@ -244,9 +243,10 @@ class GameEngine(object):
                     self.__draw_calls[str(fnc)] += 1
                 # Print Frame Rate
                 if self.__showfps:
-                    text = self.__font.render('FPS: %d' % \
-                           self.clock.get_fps(), False, (255, 255, 255),
-                           (159, 182, 205))
+                    text = self.__font.render(
+                        'FPS: %d' %
+                        self.clock.get_fps(), False,
+                        (255, 255, 255), (159, 182, 205))
                     screen.blit(text, (0, 0))
                 pygame.display.flip()
 
@@ -274,10 +274,9 @@ class GameEngine(object):
                     self._draw(self.__tick_time)
                     self.__tick_time = 0
 
-
             # Handle User event Timers
             elif event.type >= pygame.USEREVENT and \
-                event.type < pygame.NUMEVENTS:
+                    event.type < pygame.NUMEVENTS:
 
                 timer_id = event.type - pygame.USEREVENT
 
@@ -346,7 +345,7 @@ class GameEngine(object):
         try:
             self.__event_cb.remove(cb)
             return True
-        except:
+        except BaseException:
             return False
 
     def list_event_callbacks(self):
@@ -413,7 +412,7 @@ class GameEngine(object):
         try:
             self.__draw_lst.remove(fnc)
             return True
-        except:
+        except BaseException:
             return False
 
     def list_draw_callbacks(self):

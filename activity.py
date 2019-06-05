@@ -44,7 +44,6 @@ class VteActivity(activity.Activity):
 
         if DEBUG_TERMINAL:
             toolbox = ToolbarBox(self)
-            toolbar = toolbox.toolbar
             self.set_toolbar_box(toolbox)
 
             self._vte.set_size(30, 5)
@@ -70,7 +69,9 @@ class VteActivity(activity.Activity):
         bundle_path = activity.get_bundle_path()
         self._pid = self._vte.spawn_sync(
             Vte.PtyFlags.DEFAULT, bundle_path, [
-                '/bin/sh', '-c', 'python %s/LemonadeStand.py --width=1200 --height=900 --font=36' %
+                '/bin/sh', '-c',
+                'python %s/LemonadeStand.py --width=1200 \
+                --height=900 --font=36' %
                 bundle_path], [
                 "PYTHONPATH=%s/library" %
                 bundle_path], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None)

@@ -27,7 +27,7 @@ from gettext import gettext as _
 from operator import itemgetter
 
 from constants import STARTING_MONEY, STARTING_PRICE, MAX_MSG, EVENTS,\
-                      ITEMS, CURRENCY, RECIPES, DIFFICULTY, format_money
+    ITEMS, CURRENCY, RECIPES, DIFFICULTY, format_money
 
 
 class LemonadeMain:
@@ -121,7 +121,7 @@ class LemonadeMain:
             event = EVENTS[event_num]
 
             itemcount = self.count_item(event['item'])
-            
+
             if event['change'] < 0:
                 remove = abs(event['change'])
                 if itemcount > remove:
@@ -143,19 +143,19 @@ class LemonadeMain:
         for item in items:
             status = self.buy_item(item, items[item])
             if status == -1:
-                self.add_msg(_("You can't afford any units of %s.") % \
-                    ITEMS[item]['name'])
+                self.add_msg(_("You can't afford any units of %s.") %
+                             ITEMS[item]['name'])
 
             else:
-                self.add_msg(_("Bought %d units of %s.") % \
-                    (items[item], ITEMS[item]['name']))
+                self.add_msg(_("Bought %d units of %s.") %
+                             (items[item], ITEMS[item]['name']))
 
         # Calculate how many can be bought
         inventory_hold = []
         for item_key in list(ITEMS.keys()):
             if self.recipe(item_key) == 0:
                 continue
-            inventory_hold.append(\
+            inventory_hold.append(
                 self.count_item(item_key) / self.recipe(item_key))
 
         sales = min(inventory_hold)
@@ -173,25 +173,25 @@ class LemonadeMain:
 
         self.__resources['last_income'] = sales * self.__resources['price']
 
-        self.add_msg(_("Sold %d cups, at %s each") % \
-                (sales, format_money(self.__resources['price'])))
+        self.add_msg(_("Sold %d cups, at %s each") %
+                     (sales, format_money(self.__resources['price'])))
 
         # Show profit and expenses if the difficuly is less than impossible
         if self.__difficulty < DIFFICULTY.index("Impossible"):
-            self.add_msg("You spent %s on supplies" % \
-                    format_money(self.__resources['money'] - start_money))
-            self.add_msg("and made %s in sales" % \
-                    format_money(self.__resources['last_income']))
+            self.add_msg("You spent %s on supplies" %
+                         format_money(self.__resources['money'] - start_money))
+            self.add_msg("and made %s in sales" %
+                         format_money(self.__resources['last_income']))
 
         profit_to_calculate = (self.__resources['money'] - start_money)\
-                              + self.__resources['last_income']
+            + self.__resources['last_income']
         self.__resources['last_profit'] = profit_to_calculate
 
         if profit_to_calculate > 0:
             # Show the net porfit if difficulty is less than normal
             if self.__difficulty < DIFFICULTY.index("Hard"):
-                self.add_msg("That comes to %s in profit" % \
-                    (format_money(self.__resources['last_profit'])))
+                self.add_msg("That comes to %s in profit" %
+                             (format_money(self.__resources['last_profit'])))
             return True
 
         else:
@@ -207,12 +207,14 @@ class LemonadeMain:
                                  mini game
         """
         if self.__resources['last_profit'] > 0:
-            mini_game_success = self.count_game(mini_game_key, self.__resources['last_profit'])
+            mini_game_success = self.count_game(
+                mini_game_key, self.__resources['last_profit'])
             if mini_game_success:
                 # Give them the money if they added
                 self.__resources['money'] += self.__resources['last_income']
             else:
-                self.add_msg(_("That is the incorrect amount of money. Try again."))
+                self.add_msg(
+                    _("That is the incorrect amount of money. Try again."))
                 return False
         return True
 
@@ -220,7 +222,7 @@ class LemonadeMain:
         """
         Processes the end of the day events.
         """
-        
+
         # Decay items
         self.decay_items()
 
@@ -291,7 +293,7 @@ class LemonadeMain:
         while to_remove > 0:
             try:
                 item = resource.pop(0)
-            except:
+            except BaseException:
                 return False
 
             if item[1] > to_remove:
@@ -321,7 +323,7 @@ class LemonadeMain:
                     if item[0] == 0:
                         new_list.append([item[0], item[1]])
                     else:
-                        new_list.append([item[0]-1, item[1]])
+                        new_list.append([item[0] - 1, item[1]])
                 elif item[1] != 0:
                     self.add_msg("%d %ss have gone bad" % (item[1], item_key))
 
@@ -355,7 +357,7 @@ class LemonadeMain:
 
         # Set previous_value to target so it always accepts the first key
         previous_value = target
-        for key, value in  currency_values:
+        for key, value in currency_values:
             cal_val = (value * values[key])
             if cal_val > previous_value:
                 return False
