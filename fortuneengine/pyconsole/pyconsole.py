@@ -19,19 +19,24 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
-import pygame, os, sys
-from pygame.locals import *
+import pygame
+import os
+import sys
+from pygame.locals import KEYDOWN, K_RETURN, K_BACKSPACE, K_TAB,\
+    K_DOWN, K_UP, K_LEFT, K_RIGHT, K_DELETE,\
+    K_HOME, K_END, K_PAGEUP, K_PAGEDOWN, KMOD_CTRL
 
 import re       # Python's Regexp library. Used in pyconsole for parsing
-import textwrap # Used for proper word wrapping
+import textwrap  # Used for proper word wrapping
 from string import ascii_letters
-from code import InteractiveConsole     # Gives us access to the python interpreter
+# Gives us access to the python interpreter
+from code import InteractiveConsole
 
 
 __version__ = "0.7"
 
-WIDTH=0
-HEIGHT=1
+WIDTH = 0
+HEIGHT = 1
 
 OUT = 0
 IN = 1
@@ -45,40 +50,48 @@ font_path = os.path.join(path, "fonts")
 cfg_path = os.path.join(path, "pyconsole.cfg")
 
 
-re_token = re.compile(r"""[\"].*?[\"]|[\{].*?[\}]|[\(].*?[\)]|[\[].*?[\]]|\S+""")
+re_token = re.compile(
+    r"""[\"].*?[\"]|[\{].*?[\}]|[\(].*?[\)]|[\[].*?[\]]|\S+""")
 re_is_list = re.compile(r'^[{\[(]')
 re_is_number = re.compile(r"""
                         (?x)
                         [-]?[0][x][0-9a-fA-F]+[lLjJ]? |     #  Hexadecimal
                         [-]?[0][0-7]+[lLjJ]? |              #  Octal
-                        [-]?[\d]+(?:[.][\d]*)?[lLjJ]?       #  Decimal (Int or float)
+                        [-]?[\d]+(?:[.][\d]*)?[lLjJ]?       #  Decimal
+                                                            #(Int or float)
                         """)
 re_is_assign = re.compile(r'[$](?P<name>[a-zA-Z_]+\S*)\s*[=]\s*(?P<value>.+)')
-re_is_comment =  re.compile(r'\s*#.*')
+re_is_comment = re.compile(r'\s*#.*')
 re_is_var = re.compile(r'^[$][a-zA-Z_]+\w*\Z')
-
 
 
 class Writable(list):
     line_pointer = -1
+
     def write(self, line):
         self.append(str(line))
+
     def reset(self):
         self.__init__()
+
     def readline(self, size=-1):
-        # Python's interactive help likes to try and call this, which causes the program to crash
+        # Python's interactive help likes to try and call \
+        # this, which causes the program to crash
         # I see no reason to implement interactive help.
         raise NotImplementedError
+
 
 class ParseError(Exception):
     def __init__(self, token):
         self.token = token
+
     def at_token(self):
         return self.token
 
+
 def balanced(t):
     stack = []
-    pairs = {"\'":"\'", '\"':'\"', "{":"}", "[":"]", "(":")"}
+    pairs = {"\'": "\'", '\"': '\"', "{": "}", "[": "]", "(": ")"}
     for char in t:
         if stack and char == pairs[stack[-1]]:
             stack.pop()
@@ -86,10 +99,20 @@ def balanced(t):
             stack.append(char)
     return not bool(stack)
 
+
 class Console:
-    def __init__(self, screen, rect, functions={}, key_calls={}, vars={}, syntax={}):
+    def __init__(
+            self,
+            screen,
+            rect,
+            functions={},
+            key_calls={},
+            vars={},
+            syntax={}):
         if not pygame.display.get_init():
-            raise pygame.error("Display not initialized. Initialize the display before creating a Console")
+            raise pygame.error(
+                "Display not initialized. Initialize the \
+                    display before creating a Console")
 
         if not pygame.font.get_init():
             pygame.font.init()
@@ -102,26 +125,26 @@ class Console:
         self.user_syntax = syntax
         self.user_namespace = {}
 
-        self.variables = {\
-                "bg_alpha":int,\
-                "bg_color": list,\
-                "txt_color_i": list,\
-                "txt_color_o": list,\
-                "ps1": str,\
-                "ps2": str,\
-                "ps3": str,\
-                "active": bool,\
-                "repeat_rate": list,\
-                "preserve_events":bool,\
-                "python_mode":bool,\
-                "motd":list
-                }
+        self.variables = {
+            "bg_alpha": int,
+            "bg_color": list,
+            "txt_color_i": list,
+            "txt_color_o": list,
+            "ps1": str,
+            "ps2": str,
+            "ps3": str,
+            "active": bool,
+            "repeat_rate": list,
+            "preserve_events": bool,
+            "python_mode": bool,
+            "motd": list
+        }
 
         self.load_cfg()
 
         self.set_interpreter()
 
-        #pygame.key.set_repeat(*self.repeat_rate)
+        # pygame.key.set_repeat(*self.repeat_rate)
 
         self.bg_layer = pygame.Surface(self.size)
         self.bg_layer.set_alpha(self.bg_alpha)
@@ -130,14 +153,17 @@ class Console:
         self.txt_layer.set_colorkey(self.bg_color)
 
         try:
-            self.font = pygame.font.Font(os.path.join(font_path,"default.ttf"), 14)
+            self.font = pygame.font.Font(
+                os.path.join(font_path, "default.ttf"), 14)
         except IOError:
             self.font = pygame.font.SysFont("monospace", 14)
 
         self.font_height = self.font.get_linesize()
         self.max_lines = (self.size[HEIGHT] / self.font_height) - 1
 
-        self.max_chars = (self.size[WIDTH]/(self.font.size(ascii_letters)[WIDTH]/len(ascii_letters))) - 1
+        self.max_chars = (
+            self.size[WIDTH] / (self.font.size(ascii_letters)[WIDTH]
+                                / len(ascii_letters))) - 1
         self.txt_wrapper = textwrap.TextWrapper()
 
         self.c_out = self.motd
@@ -148,21 +174,22 @@ class Console:
         self.c_draw_pos = 0
         self.c_scroll = 0
 
-
         self.changed = True
 
         self.func_calls = {}
         self.key_calls = {}
 
-        self.add_func_calls({"echo":self.output, "clear": self.clear, "help":self.help})
+        self.add_func_calls(
+            {"echo": self.output, "clear": self.clear, "help": self.help})
         self.add_func_calls(functions)
 
-        self.add_key_calls({"l":self.clear, "c":self.clear_input, "w":self.set_active})
+        self.add_key_calls(
+            {"l": self.clear, "c": self.clear_input, "w": self.set_active})
         self.add_key_calls(key_calls)
 
-
     ##################
-    #-Initialization-#
+    # -Initialization-#
+
     def load_cfg(self):
         '''\
         Loads the config file path/pygame-console.cfg\
@@ -177,18 +204,18 @@ class Console:
                     continue
                 elif len(tokens) != 2:
                     continue
-                self.safe_set_attr(tokens[0],tokens[1])
+                self.safe_set_attr(tokens[0], tokens[1])
 
     def init_default_cfg(self):
         self.bg_alpha = 255
-        self.bg_color = [0x0,0x0,0x0]
-        self.txt_color_i = [0xFF,0xFF,0xFF]
-        self.txt_color_o = [0xCC,0xCC,0xCC]
+        self.bg_color = [0x0, 0x0, 0x0]
+        self.txt_color_i = [0xFF, 0xFF, 0xFF]
+        self.txt_color_o = [0xCC, 0xCC, 0xCC]
         self.ps1 = "] "
         self.ps2 = ">>> "
         self.ps3 = "... "
         self.active = False
-        self.repeat_rate = [500,30]
+        self.repeat_rate = [500, 30]
         self.python_mode = False
         self.preserve_events = False
         self.motd = ["[PyConsole 0.5]"]
@@ -198,7 +225,9 @@ class Console:
         Safely set the console variables
         '''
         if name in self.variables:
-            if isinstance(value, self.variables[name]) or not self.variables[name]:
+            if isinstance(
+                    value,
+                    self.variables[name]) or not self.variables[name]:
                 self.__dict__[name] = value
 
     def add_func_calls(self, functions):
@@ -207,7 +236,7 @@ class Console:
         Arguments:
            functions -- dictionary of functions to add.
         '''
-        if isinstance(functions,dict):
+        if isinstance(functions, dict):
             self.func_calls.update(functions)
             self.user_namespace.update(self.func_calls)
 
@@ -217,7 +246,7 @@ class Console:
         Arguments:
            functions -- dictionary of key_calls to add.
         '''
-        if isinstance(functions,dict):
+        if isinstance(functions, dict):
             self.key_calls.update(functions)
 
     def output(self, text):
@@ -227,11 +256,11 @@ class Console:
            text -- Text to be displayed
         '''
         if not str(text):
-            return;
+            return
 
         try:
             self.changed = True
-            if not isinstance(text,str):
+            if not isinstance(text, str):
                 text = str(text)
             text = text.expandtabs()
             text = text.splitlines()
@@ -239,10 +268,10 @@ class Console:
             for line in text:
                 for w in self.txt_wrapper.wrap(line):
                     self.c_out.append(w)
-        except:
+        except BaseException:
             pass
 
-    def set_active(self,b=None):
+    def set_active(self, b=None):
         '''\
         Activate or Deactivate the console
         Arguments:
@@ -253,13 +282,13 @@ class Console:
         else:
             self.active = b
 
-
     def format_input_line(self):
         '''\
         Format input line to be displayed
         '''
-        # The \v here is sort of a hack, it's just a character that isn't recognized by the font engine
-        text = self.c_in[:self.c_pos] + "\v" + self.c_in[self.c_pos+1:]
+        # The \v here is sort of a hack, it's just a character that isn't
+        # recognized by the font engine
+        text = self.c_in[:self.c_pos] + "\v" + self.c_in[self.c_pos + 1:]
         n_max = self.max_chars - len(self.c_ps)
         vis_range = self.c_draw_pos, self.c_draw_pos + n_max
         return self.c_ps + text[vis_range[0]:vis_range[1]]
@@ -269,30 +298,42 @@ class Console:
         Draw the console to the parent screen
         '''
         if not self.active:
-            return;
+            return
 
         if self.changed:
             self.changed = False
             # Draw Output
             self.txt_layer.fill(self.bg_color)
-            lines = self.c_out[-(self.max_lines+self.c_scroll):len(self.c_out)-self.c_scroll]
-            y_pos = self.size[HEIGHT]-(self.font_height*(len(lines)+1))
+            lines = self.c_out[-(self.max_lines + self.c_scroll)
+                                :len(self.c_out) - self.c_scroll]
+            y_pos = self.size[HEIGHT] - (self.font_height * (len(lines) + 1))
 
             for line in lines:
                 tmp_surf = self.font.render(line, True, self.txt_color_o)
                 self.txt_layer.blit(tmp_surf, (1, y_pos, 0, 0))
                 y_pos += self.font_height
             # Draw Input
-            tmp_surf = self.font.render(self.format_input_line(), True, self.txt_color_i)
-            self.txt_layer.blit(tmp_surf, (1,self.size[HEIGHT]-self.font_height,0,0))
+            tmp_surf = self.font.render(
+                self.format_input_line(), True, self.txt_color_i)
+            self.txt_layer.blit(
+                tmp_surf, (1, self.size[HEIGHT] - self.font_height, 0, 0))
             # Clear background and blit text to it
             self.bg_layer.fill(self.bg_color)
-            self.bg_layer.blit(self.txt_layer,(0,0,0,0))
+            self.bg_layer.blit(self.txt_layer, (0, 0, 0, 0))
 
         # Draw console to parent screen
-        # self.parent_screen.fill(self.txt_color_i, (self.rect.x-1, self.rect.y-1, self.size[WIDTH]+2, self.size[HEIGHT]+2))
-        pygame.draw.rect(self.parent_screen, self.txt_color_i, (self.rect.x-1, self.rect.y-1, self.size[WIDTH]+2, self.size[HEIGHT]+2), 1)
-        self.parent_screen.blit(self.bg_layer,self.rect)
+        # self.parent_screen.fill(self.txt_color_i, \
+        # (self.rect.x-1, self.rect.y-1, self.size[WIDTH]+2,\
+        # self.size[HEIGHT]+2))
+        pygame.draw.rect(
+            self.parent_screen,
+            self.txt_color_i,
+            (self.rect.x - 1,
+             self.rect.y - 1,
+             self.size[WIDTH] + 2,
+             self.size[HEIGHT] + 2),
+            1)
+        self.parent_screen.blit(self.bg_layer, self.rect)
 
     #######################################################################
     # Functions to communicate with the console and the python interpreter#
@@ -338,7 +379,8 @@ class Console:
 
     def send_python(self, text):
         '''\
-        Sends input the the python interpreter in effect giving the user the ability to do anything python can.
+        Sends input the the python interpreter in effect
+        giving the user the ability to do anything python can.
         '''
         self.c_ps = self.ps2
         self.catch_output()
@@ -351,7 +393,7 @@ class Console:
             code = "".join(self.py_fds[OUT])
             self.python_interpreter.push("\n")
             self.python_interpreter.runsource(code)
-        for i in self.py_fds[OUT]+self.py_fds[ERR]:
+        for i in self.py_fds[OUT] + self.py_fds[ERR]:
             self.output(i)
         self.release_output()
 
@@ -361,33 +403,33 @@ class Console:
         '''
         if not text:    # Output a blank row if nothing is entered
             self.output("")
-            return;
+            return
 
         self.add_to_history(text)
 
-        #Determine if the statement is an assignment
+        # Determine if the statement is an assignment
         assign = re_is_assign.match(text)
         try:
-            #If it is tokenize only the "value" part of $name = value
+            # If it is tokenize only the "value" part of $name = value
             if assign:
                 tokens = self.tokenize(assign.group('value'))
             else:
                 tokens = self.tokenize(text)
         except ParseError as e:
             self.output(r'At Token: "%s"' % e.at_token())
-            return;
-
-        if tokens == None:
             return
 
-        #Evaluate
+        if tokens is None:
+            return
+
+        # Evaluate
         try:
             out = None
             # A variable alone on a line
-            if (len(tokens) is 1) and re_is_var.match(text) and not assign:
+            if (len(tokens) == 1) and re_is_var.match(text) and not assign:
                 out = tokens[0]
             # Statement in the form $name = value
-            elif (len(tokens) is 1) and assign:
+            elif (len(tokens) == 1) and assign:
                 self.setvar(assign.group('name'), tokens[0])
             else:
                 # Function
@@ -396,29 +438,29 @@ class Console:
                 if assign:
                     self.setvar(assign.group('name'), out)
 
-            if not out == None:
+            if out is not None:
                 self.output(out)
-        except (KeyError,TypeError):
+        except (KeyError, TypeError):
             self.output("Unknown Command: " + str(tokens[0]))
             self.output(r'Type "help" for a list of commands.')
 
-
-
     ####################################################
-    #-Functions for sharing variables with the console-#
+    # -Functions for sharing variables with the console-#
+
     def setvar(self, name, value):
         '''\
         Sets the value of a variable
         '''
         if name in self.user_vars or name not in self.__dict__:
-            self.user_vars.update({name:value})
+            self.user_vars.update({name: value})
             self.user_namespace.update(self.user_vars)
         elif name in self.__dict__:
-            self.__dict__.update({name:value})
+            self.__dict__.update({name: value})
 
     def getvar(self, name):
         '''\
-        Gets the value of a variable, this is useful for people that want to access console variables from within their game
+        Gets the value of a variable, this is useful for people that
+        want to access console variables from within their game
         '''
         if name in self.user_vars or name not in self.__dict__:
             return self.user_vars[name]
@@ -438,13 +480,12 @@ class Console:
         else:
             return self.user_vars
 
-
     def add_to_history(self, text):
         '''\
         Add specified text to the history
         '''
-        self.c_hist.insert(-1,text)
-        self.c_hist_pos = len(self.c_hist)-1
+        self.c_hist.insert(-1, text)
+        self.c_hist_pos = len(self.c_hist) - 1
 
     def clear_input(self):
         '''\
@@ -460,9 +501,10 @@ class Console:
         '''
         self.c_pos = newpos
         if (self.c_pos - self.c_draw_pos) >= (self.max_chars - len(self.c_ps)):
-            self.c_draw_pos = max(0, self.c_pos - (self.max_chars - len(self.c_ps)))
+            self.c_draw_pos = max(
+                0, self.c_pos - (self.max_chars - len(self.c_ps)))
         elif self.c_draw_pos > self.c_pos:
-            self.c_draw_pos = self.c_pos - (self.max_chars/2)
+            self.c_draw_pos = self.c_pos - (self.max_chars / 2)
             if self.c_draw_pos < 0:
                 self.c_draw_pos = 0
                 self.c_pos = 0
@@ -480,34 +522,36 @@ class Console:
         Loop through pygame events and evaluate them
         '''
         if not self.active:
-            return False;
+            return False
 
         if event.type == KEYDOWN:
             self.changed = True
-            ## Special Character Manipulation
+            # Special Character Manipulation
             if event.key == K_TAB:
                 self.c_in = self.str_insert(self.c_in, "    ")
             elif event.key == K_BACKSPACE:
                 if self.c_pos > 0:
-                    self.c_in = self.c_in[:self.c_pos-1] + self.c_in[self.c_pos:]
-                    self.set_pos(self.c_pos-1)
+                    self.c_in = self.c_in[:self.c_pos -
+                                          1] + self.c_in[self.c_pos:]
+                    self.set_pos(self.c_pos - 1)
             elif event.key == K_DELETE:
                 if self.c_pos < len(self.c_in):
-                    self.c_in = self.c_in[:self.c_pos] + self.c_in[self.c_pos+1:]
+                    self.c_in = self.c_in[:self.c_pos] + \
+                        self.c_in[self.c_pos + 1:]
             elif event.key == K_RETURN or event.key == 271:
                 self.submit_input(self.c_in)
-            ## Changing Cursor Position
+            # Changing Cursor Position
             elif event.key == K_LEFT:
                 if self.c_pos > 0:
-                    self.set_pos(self.c_pos-1)
+                    self.set_pos(self.c_pos - 1)
             elif event.key == K_RIGHT:
                 if self.c_pos < len(self.c_in):
-                    self.set_pos(self.c_pos+1)
+                    self.set_pos(self.c_pos + 1)
             elif event.key == K_HOME:
                 self.set_pos(0)
             elif event.key == K_END:
                 self.set_pos(len(self.c_in))
-            ## History Navigation
+            # History Navigation
             elif event.key == K_UP:
                 if len(self.c_out):
                     if self.c_hist_pos > 0:
@@ -516,22 +560,23 @@ class Console:
                     self.set_pos(len(self.c_in))
             elif event.key == K_DOWN:
                 if len(self.c_out):
-                    if self.c_hist_pos < len(self.c_hist)-1:
+                    if self.c_hist_pos < len(self.c_hist) - 1:
                         self.c_hist_pos += 1
                     self.c_in = self.c_hist[self.c_hist_pos]
                     self.set_pos(len(self.c_in))
-            ## Scrolling
+            # Scrolling
             elif event.key == K_PAGEUP:
-                if self.c_scroll < len(self.c_out)-1:
+                if self.c_scroll < len(self.c_out) - 1:
                     self.c_scroll += 1
             elif event.key == K_PAGEDOWN:
                 if self.c_scroll > 0:
                     self.c_scroll -= 1
-            ## Normal character printing
+            # Normal character printing
             elif event.key >= 32:
                 mods = pygame.key.get_mods()
                 if mods & KMOD_CTRL:
-                    if event.key in range(256) and chr(event.key) in self.key_calls:
+                    if event.key in range(256) and chr(
+                            event.key) in self.key_calls:
                         self.key_calls[chr(event.key)]()
                 else:
                     char = str(event.str)
@@ -553,7 +598,7 @@ class Console:
             raise ParseError(tok)
         except NameError as strerror:
             self.output("NameError: " + str(strerror))
-        except:
+        except BaseException:
             self.output("Error:")
             raise ParseError(tok)
         else:
@@ -566,10 +611,10 @@ class Console:
         if re_is_comment.match(s):
             return [s]
 
-        for re in self.user_syntax:
-            group = re.match(s)
+        for x in self.user_syntax:
+            group = x.match(s)
             if group:
-                self.user_syntax[re](self, group)
+                self.user_syntax[x](self, group)
                 return
 
         tokens = re_token.findall(s)
@@ -589,9 +634,9 @@ class Console:
             elif val == "False":
                 cmd.append(False)
             elif re_is_list.match(val):
-                while not balanced(val) and (i + t_count) < len(tokens)-1:
+                while not balanced(val) and (i + t_count) < len(tokens) - 1:
                     t_count += 1
-                    val += tokens[i+t_count]
+                    val += tokens[i + t_count]
                 else:
                     if (i + t_count) < len(tokens):
                         cmd.append(self.convert_token(val))
@@ -602,9 +647,9 @@ class Console:
             i += t_count + 1
         return cmd
 
-
     ##########################
-    #-Some Builtin functions-#
+    # -Some Builtin functions-#
+
     def clear(self):
         '''\
         Clear the Screen
@@ -621,17 +666,23 @@ class Console:
              |- One or more Args - Docstring of each function will be displayed
         '''
         if args:
-            items = [(i,self.func_calls[i]) for i in args if i  in self.func_calls]
-            for i,v in items:
-                out = i + ": Takes %d arguments. " % (v.__code__.co_argcount - (v.__code__.co_varnames[0] is "self"))
+            items = [(i, self.func_calls[i])
+                     for i in args if i in self.func_calls]
+            for i, v in items:
+                out = i + ": Takes %d arguments. " % (
+                    v.__code__.co_argcount -
+                    (v.__code__.co_varnames[0] == "self"))
                 doc = v.__doc__
                 if doc:
                     out += textwrap.dedent(doc)
                 tmp_indent = self.txt_wrapper.subsequent_indent
-                self.txt_wrapper.subsequent_indent = " "*(len(i)+2)
+                self.txt_wrapper.subsequent_indent = " " * (len(i) + 2)
                 self.output(out)
                 self.txt_wrapper.subsequent_indent = tmp_indent
         else:
-            out = "Available commands: " + str(list(self.func_calls.keys())).strip("[]")
+            out = "Available commands: " + \
+                str(list(self.func_calls.keys())).strip("[]")
             self.output(out)
-            self.output(r'Type "help command-name" for more information on that command')
+            self.output(
+                r'Type "help command-name" for more\
+                information on that command')

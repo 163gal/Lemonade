@@ -40,9 +40,9 @@ class GameEngineConsole(Console):
             "list_timers": gei.list_event_timers,
             "inspect": gei._inspector.inspect_object,
 
-            "profile_draw":gei.list_draw_time,
-            "profile_event":gei.list_event_time,
-            "profile_timer":gei.list_timer_time,
+            "profile_draw": gei.list_draw_time,
+            "profile_event": gei.list_event_time,
+            "profile_timer": gei.list_timer_time,
 
             "set_str": gei._inspector.set_str,
             "set_int": gei._inspector.set_int,
@@ -60,8 +60,8 @@ class GameEngineConsole(Console):
         # Call parent class's init function passing in the
         # function and key mapping dictionaries
         Console.__init__(self, gei.screen, pos,
-                           functions=function_list, key_calls=key_calls,
-                           vars={}, syntax={})
+                         functions=function_list, key_calls=key_calls,
+                         vars={}, syntax={})
 
     def console_mode(self):
         """
@@ -71,7 +71,7 @@ class GameEngineConsole(Console):
         if self.active:
             self.set_active()
         self.setvar("python_mode",
-                            not self.getvar("python_mode"))
+                    not self.getvar("python_mode"))
 
         self.set_interpreter()
         self.set_active()

@@ -26,8 +26,8 @@ from constants import ITEMS, format_money, WEATHER, CURRENCY
 from gettext import gettext as _
 from pygame import Surface, transform, image
 from pygame.locals import KEYDOWN, K_RETURN, K_BACKSPACE, K_TAB,\
-                          K_DOWN, K_UP, K_LEFT, K_RIGHT, K_ESCAPE,\
-                          K_KP1, K_KP2, K_KP3, K_KP4, K_KP6, K_KP8, K_KP9
+    K_DOWN, K_UP, K_LEFT, K_RIGHT, K_ESCAPE,\
+    K_KP1, K_KP2, K_KP3, K_KP4, K_KP6, K_KP8, K_KP9
 
 
 class LemonadeGui(GameEngineElement):
@@ -69,17 +69,17 @@ class LemonadeGui(GameEngineElement):
 
                 else:
                     t = " "
-                    
-                text_array.append("%s %s: %s" % \
-                (t, self.__input_keys[self.game_mode][i],
-                self.__input_string[self.game_mode][i]))
+
+                text_array.append("%s %s: %s" %
+                                  (t, self.__input_keys[self.game_mode][i],
+                                   self.__input_string[self.game_mode][i]))
 
         # Add day log to text
         text_array.append("")
         text_array.append(_("- Day %s Log -" % day_no))
         for message in messages:
             text_array.append(message)
-        
+
         return self._blit_to_block(text_array, (0, 0, 0), (255, 255, 255))
 
     def data_block(self, main):
@@ -91,8 +91,8 @@ class LemonadeGui(GameEngineElement):
         text_arr.append(_("- Recipe -"))
 
         for item_key in ITEMS:
-            text_arr.append("   %s: %d" % \
-                (ITEMS[item_key]['name'], main.recipe(item_key)))
+            text_arr.append("   %s: %d" %
+                            (ITEMS[item_key]['name'], main.recipe(item_key)))
 
         return self._blit_to_block(text_arr)
 
@@ -100,10 +100,10 @@ class LemonadeGui(GameEngineElement):
         # sides are at 650 and 675
         #            /1200    /900
         #            13/24   27/36
-        ingredient_block = Surface((self.game_engine.width * 11/24,
-                                    self.game_engine.height * 9/36))
+        ingredient_block = Surface((self.game_engine.width * 11 / 24,
+                                    self.game_engine.height * 9 / 36))
         ingredient_block.fill((255, 255, 255))
-        
+
         icon_size = int(ingredient_block.get_width() / (len(items) * 1.5))
         icon_width = ingredient_block.get_width() / len(items)
         j = icon_size / 3
@@ -120,24 +120,33 @@ class LemonadeGui(GameEngineElement):
             ingredient_block.blit(ren, (render_left, render_top))
             j += icon_width
 
-        ren = self.__font.render("Funds: %s" % format_money(money), True, (0, 0, 0))
+        ren = self.__font.render(
+            "Funds: %s" %
+            format_money(money), True, (0, 0, 0))
         fw, fh = ren.get_size()
         render_left = ingredient_block.get_width() / 2 - fw / 2
-        render_top = (ingredient_block.get_height() - render_top) / 2 + render_top
+        render_top = (ingredient_block.get_height() -
+                      render_top) / 2 + render_top
         ingredient_block.blit(ren, (render_left, render_top))
 
         return ingredient_block
 
     def draw_help(self):
         if self.game_mode == 0:
-            block = self._blit_to_block([_("Type in the number you want to buy of each item"),
-                                         _("(be careful: you will need all 3 supplies to make the lemonade)")])
+            block = self._blit_to_block([
+                _("""Type in the number you want to buy of each item"""),
+                _("""(be careful: you will need all 3
+                    supplies to make the lemonade)""")])
         elif self.game_mode == 1:
-            block = self._blit_to_block([_("You made %s. You need to put your money away for safekeeping." % "$200"),
-                                         _("Enter the number of dollars, quarters, dimes, nickels, and pennies that you have made.")])
+            block = self._blit_to_block([
+                _("""You made %s. You need to put your money
+                away for safekeeping.""" % """$200"""),
+                _("""Enter the number of dollars, quarters, dimes,
+                nickels, and pennies that you have made.""")])
         else:
-            block = self._blit_to_block([_("Weather can affect the amount of lemonade you sell."),
-                                         _("Watch the weather each day to see how it changes sales.")])
+            block = self._blit_to_block([
+                _("Weather can affect the amount of lemonade you sell."),
+                _("Watch the weather each day to see how it changes sales.")])
         return block
 
     def draw(self, screen, tick):
@@ -166,25 +175,34 @@ class LemonadeGui(GameEngineElement):
                             self.game_engine.height * 27 / 36))
         if main.day == 1:
             block = self.draw_help()
-            screen.blit(block, (self.game_engine.width / 2 - block.get_width() / 2, 0))
+            screen.blit(
+                block,
+                (self.game_engine.width /
+                 2 -
+                 block.get_width() /
+                 2,
+                 0))
 
     def draw_store(self, key):
         """Draws the store interface, including currently selected items."""
 
         store = image.load("images/store-outline.gif").convert()
-        store = transform.scale(store, (self.game_engine.width, self.game_engine.height))
+        store = transform.scale(
+            store, (self.game_engine.width, self.game_engine.height))
 
         # Store apron text.
-        #block_arr = [Surface((self.game_engine.width / 4, self.game_engine.height / 6))] * 3
-        #h = self.game_engine.width * 7 / 24
-        #j = self.game_engine.width / 12
-        #for num, block in enumerate(block_arr):
+        # block_arr = [Surface((self.game_engine.width / 4,
+        #               self.game_engine.height / 6))] * 3
+        # h = self.game_engine.width * 7 / 24
+        # j = self.game_engine.width / 12
+        # for num, block in enumerate(block_arr):
         #    store.blit(block, (j, 20))
         #    j += h
 
         # Store item display.
         spacer = self.game_engine.width / (len(ITEMS) * 4)
-        icon_size = (self.game_engine.width - (len(ITEMS) + 1) * spacer) / len(ITEMS)
+        icon_size = (self.game_engine.width -
+                     (len(ITEMS) + 1) * spacer) / len(ITEMS)
         j = spacer
         for num, name in enumerate(ITEMS):
             outline = Surface((icon_size, icon_size))
@@ -193,23 +211,39 @@ class LemonadeGui(GameEngineElement):
             else:
                 outline.fill((0, 255, 0))
             icon = image.load("images/icon-%s.gif" % name).convert()
-            icon = transform.scale(icon, (icon_size * 8 / 10, icon_size * 8 / 10))
+            icon = transform.scale(
+                icon, (icon_size * 8 / 10, icon_size * 8 / 10))
             outline.blit(icon, (icon_size / 10, icon_size / 10))
             store.blit(outline, (j, self.game_engine.height / 4))
 
             # Put pricing info under the item.
-            ren = self.__font.render("%s for %d" % (format_money(ITEMS[name]["cost"] * ITEMS[name]["bulk"]),
-                            ITEMS[name]["bulk"]), True, (0, 0, 0))
+            ren = self.__font.render(
+                "%s for %d" %
+                (format_money(
+                    ITEMS[name]["cost"] *
+                    ITEMS[name]["bulk"]),
+                    ITEMS[name]["bulk"]),
+                True,
+                (0,
+                 0,
+                 0))
             fw, fh = ren.get_size()
             render_left = j + (icon_size / 2) - (fw / 2)
-            store.blit(ren, (render_left, self.game_engine.height / 4 + icon_size + 5))
+            store.blit(
+                ren,
+                (render_left,
+                 self.game_engine.height /
+                 4 +
+                 icon_size +
+                 5))
 
             # Put an item count under the icon.
-            ren = self.__font.render(self.__input_string[0][num], True, (0, 0, 0))
+            ren = self.__font.render(
+                self.__input_string[0][num], True, (0, 0, 0))
             fw, fh = ren.get_size()
             render_left = j + (icon_size / 2) - (fw / 2)
             store.blit(ren, (render_left, self.game_engine.height * 5 / 8))
-            
+
             j += icon_size + spacer
 
         return store
@@ -247,7 +281,7 @@ class LemonadeGui(GameEngineElement):
         """
         Responds to any events that happen during the course of the game.
         """
-        
+
         if event.type == KEYDOWN:
             main = self.game_engine.get_object('main')
             if main.splash:
@@ -260,11 +294,11 @@ class LemonadeGui(GameEngineElement):
                 item_list = {}
                 for i in range(0, len(self.__input_keys[self.game_mode])):
                     item_list[self.__input_keys[self.game_mode][i]] = \
-                                int(self.__input_string[self.game_mode][i])
+                        int(self.__input_string[self.game_mode][i])
                     self.__input_string[self.game_mode][i] = "0"
                 if self.game_mode == 0:
 
-                    #Will return true if go to profit game
+                    # Will return true if go to profit game
                     if(main.process_day_logic(item_list)):
                         self.game_mode = 1
                     else:
@@ -283,65 +317,65 @@ class LemonadeGui(GameEngineElement):
                 self.game_engine.stop_event_loop()
 
             elif event.key == K_BACKSPACE:
-                handle = self.__input_string[self.game_mode]\
-                            [self.__input_mode[self.game_mode]]
+                handle = self.__input_string[self.game_mode][
+                            self.__input_mode[self.game_mode]]
 
                 if len(handle) == 1:
                     handle = "0"
                 else:
                     handle = handle[0:-1]
 
-                self.__input_string[self.game_mode][self.__input_mode[\
-                                    self.game_mode]] = handle
+                self.__input_string[self.game_mode][self.__input_mode[
+                    self.game_mode]] = handle
 
             # Go to the next field
             elif event.key in [K_TAB, K_RIGHT, K_KP2, K_KP6]:
                 self.__input_mode[self.game_mode] = \
                     (self.__input_mode[self.game_mode] + 1) %\
-                        len(self.__input_keys[self.game_mode])
+                    len(self.__input_keys[self.game_mode])
 
             # Go up to previous field
             elif event.key in [K_LEFT, K_KP4, K_KP8]:
                 self.__input_mode[self.game_mode] = \
                     (self.__input_mode[self.game_mode] - 1) %\
-                        len(self.__input_keys[self.game_mode])
+                    len(self.__input_keys[self.game_mode])
 
             # Text input, only handles numbers (ascii 48 - 58)
             elif event.key >= 48 and event.key <= 58:
                 key = str(event.str)
 
-                handle = self.__input_string[self.game_mode]\
-                    [self.__input_mode[self.game_mode]]
+                handle = self.__input_string[self.game_mode][
+                            self.__input_mode[self.game_mode]]
 
                 if handle == "0":
                     handle = key
                 else:
                     handle = "%s%s" % (handle, key)
 
-                self.__input_string[self.game_mode][self.__input_mode[\
+                self.__input_string[self.game_mode][self.__input_mode[
                     self.game_mode]] = handle
 
             # Increment
             elif event.key in [K_UP, K_KP9]:
 
-                handle = int(self.__input_string[self.game_mode]\
-                    [self.__input_mode[self.game_mode]])
+                handle = int(self.__input_string[self.game_mode]
+                             [self.__input_mode[self.game_mode]])
 
                 handle += 1
 
-                self.__input_string[self.game_mode][self.__input_mode[\
+                self.__input_string[self.game_mode][self.__input_mode[
                     self.game_mode]] = "%s" % handle
 
             # Decrement
             elif event.key in [K_DOWN, K_KP3]:
 
-                handle = int(self.__input_string[self.game_mode]\
-                    [self.__input_mode[self.game_mode]])
-                
+                handle = int(self.__input_string[self.game_mode]
+                             [self.__input_mode[self.game_mode]])
+
                 if handle > 0:
                     handle -= 1
 
-                self.__input_string[self.game_mode][self.__input_mode[\
+                self.__input_string[self.game_mode][self.__input_mode[
                     self.game_mode]] = "%s" % handle
 
             self.game_engine.set_dirty()

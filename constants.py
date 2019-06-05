@@ -21,6 +21,7 @@
 #     Justin Lewis <jlew.blackout@gmail.com>
 #     Nathaniel Case <Qalthos@gmail.com>
 
+import locale
 from gettext import gettext as _
 
 STARTING_MONEY = 1000
@@ -45,12 +46,12 @@ ITEMS = {
         'decay': 0,
         'bulk': 50
     },
-#    'strawberry': {
-#        'name': _('Strawberry'),
-#        'cost': 50,
-#        'decay': 3,
-#        'bulk': 5
-#    }
+    #    'strawberry': {
+    #        'name': _('Strawberry'),
+    #        'cost': 50,
+    #        'decay': 3,
+    #        'bulk': 5
+    #    }
 }
 
 WEATHER = ["cloudy", "nice", "hot"]
@@ -59,19 +60,19 @@ EVENTS = [
     {'text': _("A lemon truck crashes in front of your stand!"),
      'item': 'lemon',
      'change': 10
-    },
+     },
     {'text': _("It starts raining cups!"),
      'item': 'cup',
      'change': 10
-    },
+     },
     {'text': _("Ants steal some of your supplies!"),
      'item': 'sugar',
      'change': -10
-    },
+     },
     {'text': _("A sugar salesman gives you some free samples!"),
      'item': 'sugar',
      'change': 10
-    }
+     }
 
 ]
 
@@ -113,8 +114,8 @@ RECIPES = {
     }
 }
 
-import locale
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-def format_money(value):
-    return locale.currency( value / 100.0, grouping=True )
 
+
+def format_money(value):
+    return locale.currency(value / 100.0, grouping=True)
