@@ -342,7 +342,7 @@ class LemonadeGui(GameEngineElement):
 
             # Text input, only handles numbers (ascii 48 - 58)
             elif event.key >= 48 and event.key <= 58:
-                key = str(event.str)
+                key = str(event.key - 48)
 
                 handle = self.__input_string[self.game_mode][
                             self.__input_mode[self.game_mode]]
