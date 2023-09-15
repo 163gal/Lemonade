@@ -317,6 +317,7 @@ class GameEngine(object):
 
                     if retur_val:
                         break
+            pygame.display.flip()
 
     def stop_event_loop(self):
         """
