@@ -55,7 +55,7 @@ class GameEngine(object):
         self.width = width
         self.height = height
         size = width, height
-        self.screen = pygame.display.set_mode(size)
+        self.screen = pygame.display.set_mode(size, pygame.NOFRAME)
         pygame.display.set_caption(title)
         self.__fps = DrawableFontObject("", pygame.font.Font(None, 17))
         self.__fps.setPosition(0, 0)
