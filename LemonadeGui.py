@@ -135,8 +135,8 @@ class LemonadeGui(GameEngineElement):
         if self.game_mode == 0:
             block = self._blit_to_block([
                 _("""Type in the number you want to buy of each item"""),
-                _("""(be careful: you will need all 3
-                    supplies to make the lemonade)""")])
+                _("""(be careful: you will need all 3 """
+                  """supplies to make the lemonade)""")])
         elif self.game_mode == 1:
             block = self._blit_to_block([
                 _("""You made %s. You need to put your money
