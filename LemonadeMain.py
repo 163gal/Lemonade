@@ -142,6 +142,7 @@ class LemonadeMain:
         # Process Item Payment
         for item in items:
             status = self.buy_item(item, items[item])
+            items[item] = status
             if status == -1:
                 self.add_msg(_("You can't afford any units of %s.") %
                              ITEMS[item]['name'])
