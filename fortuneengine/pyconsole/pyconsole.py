@@ -579,7 +579,7 @@ class Console:
                             event.key) in self.key_calls:
                         self.key_calls[chr(event.key)]()
                 else:
-                    char = str(event.str)
+                    char = str(event.unicode)
                     self.c_in = self.str_insert(self.c_in, char)
         return True
 
