@@ -150,7 +150,8 @@ class LemonadeGui(GameEngineElement):
                 _("Weather can affect the amount of lemonade you sell."),
                 _("Watch the weather each day to see how it changes sales.")])
         if self.help:
-            new_info = _("""
+            new_info = _(
+                """
             Help screen for Lemonade Stand
 
             <ENTER>:
@@ -172,7 +173,8 @@ class LemonadeGui(GameEngineElement):
 
             <ESC>:
             From any screen - Exits the game.
-            """)
+            """
+            )
             new_info_array = new_info.strip().split("\n")
             block = self._blit_to_block(new_info_array)
         return block
@@ -214,11 +216,7 @@ class LemonadeGui(GameEngineElement):
             block = self.draw_help()
             screen.blit(
                 block,
-                (self.game_engine.width /
-                 2 -
-                 block.get_width() /
-                 2,
-                 0))
+                (self.game_engine.width / 2 - block.get_width() / 2, 0))
 
     def draw_store(self, key):
         """Draws the store interface, including currently selected items."""
