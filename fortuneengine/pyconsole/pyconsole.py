@@ -159,7 +159,7 @@ class Console:
             self.font = pygame.font.SysFont("monospace", 14)
 
         self.font_height = self.font.get_linesize()
-        self.max_lines = (self.size[HEIGHT] / self.font_height) - 1
+        self.max_lines = int((self.size[HEIGHT] / self.font_height) - 1)
 
         self.max_chars = (
             self.size[WIDTH] / (self.font.size(ascii_letters)[WIDTH]
@@ -290,7 +290,7 @@ class Console:
         # recognized by the font engine
         text = self.c_in[:self.c_pos] + "\v" + self.c_in[self.c_pos + 1:]
         n_max = self.max_chars - len(self.c_ps)
-        vis_range = self.c_draw_pos, self.c_draw_pos + n_max
+        vis_range = self.c_draw_pos, int(self.c_draw_pos + n_max)
         return self.c_ps + text[vis_range[0]:vis_range[1]]
 
     def draw(self):
