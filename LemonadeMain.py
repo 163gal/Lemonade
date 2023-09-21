@@ -255,7 +255,7 @@ class LemonadeMain:
         else:
             bulk_price = the_item['bulk'] * the_item['cost']
             # Lets try to buy as many as we can
-            can_buy = self.__resources['money'] / bulk_price
+            can_buy = self.__resources['money'] // bulk_price
 
             if can_buy != 0:
                 total = can_buy * the_item['bulk']
