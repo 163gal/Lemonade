@@ -27,7 +27,7 @@ from gettext import gettext as _
 from pygame import Surface, transform, image
 from pygame.locals import KEYDOWN, K_RETURN, K_BACKSPACE, K_TAB,\
     K_DOWN, K_UP, K_LEFT, K_RIGHT, K_ESCAPE,\
-    K_KP1, K_KP2, K_KP3, K_KP4, K_KP6, K_KP8, K_KP9
+    K_KP1, K_KP2, K_KP3, K_KP4, K_KP6, K_KP8, K_KP9, K_h
 
 
 class LemonadeGui(GameEngineElement):
@@ -38,6 +38,8 @@ class LemonadeGui(GameEngineElement):
         self.add_to_engine()
 
         self.game_mode = 2
+
+        self.help = False
 
         self.__input_keys = [list(ITEMS.keys()), list(CURRENCY.keys()), [None]]
         self.__input_mode = [0, 0, 0]
@@ -148,6 +150,34 @@ class LemonadeGui(GameEngineElement):
             block = self._blit_to_block([
                 _("Weather can affect the amount of lemonade you sell."),
                 _("Watch the weather each day to see how it changes sales.")])
+        if self.help:
+            new_info = _(
+                """
+            Help screen for Lemonade Stand
+
+            <ENTER>:
+            From Welcome Screen - Enters the game.
+            From Main Screen - Enter the store.
+            From Store Screen - Complete transaction, Leave store.
+            From Daily Log - Submits values entered.
+
+            Arrow Keys:
+            From Store Screen - Left and right arrows select a product.
+            From Daily Log - Up and down arrows select a monetary value (dollars, quarters, etc).
+
+            Number Keys:
+            From Store Screen - Used to enter the desired quantity of the selected product.
+            From Daily Log - Used to enter the number of dollars, quarters, etc. which make up your profit.
+
+            <h>:
+            From any screen - Causes a help message to appear or disappear.
+
+            <ESC>:
+            From any screen - Exits the game.
+            """
+            )
+            new_info_array = new_info.strip().split("\n")
+            block = self._blit_to_block(new_info_array)
         return block
 
     def draw(self, screen, tick):
@@ -183,6 +213,11 @@ class LemonadeGui(GameEngineElement):
                  block.get_width() /
                  2,
                  0))
+        if self.help:
+            block = self.draw_help()
+            screen.blit(
+                block,
+                (self.game_engine.width / 2 - block.get_width() / 2, 0))
 
     def draw_store(self, key):
         """Draws the store interface, including currently selected items."""
@@ -313,6 +348,9 @@ class LemonadeGui(GameEngineElement):
 
                 elif self.game_mode == 2:
                     self.game_mode = 0
+
+            elif event.key == K_h:
+                self.help = not self.help
 
             elif event.key == K_ESCAPE:
                 self.game_engine.stop_event_loop()
