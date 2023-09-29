@@ -16,68 +16,63 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-"""Activity helper classes."""
+
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
 from sugar3.activity import activity
 from sugar3.graphics.toolbarbox import ToolbarBox
+from sugar3.activity.widgets import ActivityToolbarButton
+from sugar3.activity.widgets import StopButton
 
-# Set to false to hide terminal and auto quit on exit
-DEBUG_TERMINAL = False
+import sugargame
+import sugargame.canvas
+from LemonadeStand import LemonadeStand
 
 
-class VteActivity(activity.Activity):
-    """Activity subclass built around the Vte terminal widget."""
-
+class Lemonade(activity.Activity):
     def __init__(self, handle):
-        import gi
-        from gi.repository import Gtk
-        from gi.repository import Gdk
-        from gi.repository import GLib
-        from gi.repository import Pango
-        gi.require_version('Vte', '2.91')
-        from gi.repository import Vte
+        activity.Activity.__init__(self, handle)
+        self.max_participants = 1
 
-        super(VteActivity, self).__init__(handle, create_jobject=False)
-        self.__source_object_id = None
+        self.build_toolbar()
 
-        # creates vte widget
-        self._vte = Vte.Terminal()
+        self.game = LemonadeStand()
+        self._pygamecanvas = sugargame.canvas.PygameCanvas(
+            self,
+            main=self.game.run
+        )
 
-        if DEBUG_TERMINAL:
-            toolbox = ToolbarBox(self)
-            self.set_toolbar_box(toolbox)
+        self.set_canvas(self._pygamecanvas)
+        self._pygamecanvas.grab_focus()
 
-            self._vte.set_size(30, 5)
-            self._vte.set_size_request(200, 300)
-            font = 'Monospace 10'
-            self._vte.set_font(Pango.FontDescription(font))
-            self._vte.set_colors(Gdk.color_parse('#E7E7E7'),
-                                 Gdk.color_parse('#000000'),
-                                 [])
+    def build_toolbar(self):
 
-            vtebox = Gtk.HBox()
-            vtebox.pack_start(self._vte, True, True, 0)
-            vtesb = Gtk.VScrollbar()
-            vtebox.pack_start(vtesb, False, False, 0)
-            self.set_canvas(vtebox)
+        toolbar_box = ToolbarBox()
+        self.set_toolbar_box(toolbar_box)
+        toolbar_box.show()
 
-            toolbox.show_all()
-            vtebox.show_all()
+        activity_button = ActivityToolbarButton(self)
+        toolbar_box.toolbar.insert(activity_button, -1)
+        activity_button.show()
 
-        # now start subprocess.
-        self._vte.connect('child-exited', self.on_child_exit)
-        self._vte.grab_focus()
-        bundle_path = activity.get_bundle_path()
-        self._pid = self._vte.spawn_sync(
-            Vte.PtyFlags.DEFAULT, bundle_path, [
-                '/bin/sh', '-c',
-                'python %s/LemonadeStand.py --width=1200 \
-                --height=900 --font=36' %
-                bundle_path], [
-                "PYTHONPATH=%s/library" %
-                bundle_path], GLib.SpawnFlags.DO_NOT_REAP_CHILD, None, None)
+        separator = Gtk.SeparatorToolItem()
+        separator.props.draw = False
+        separator.set_expand(False)
+        toolbar_box.toolbar.insert(separator, -1)
+        separator.show()
 
-    def on_child_exit(self, widget, status):
-        """This method is invoked when the user's script exits."""
-        if not DEBUG_TERMINAL:
-            import sys
-            sys.exit()
+        separator = Gtk.SeparatorToolItem()
+        separator.props.draw = False
+        separator.set_expand(True)
+        toolbar_box.toolbar.insert(separator, -1)
+        separator.show()
+
+        stop_button = StopButton(self)
+        toolbar_box.toolbar.insert(stop_button, -1)
+        stop_button.show()
+        stop_button.connect('clicked', self._stop_cb)
+
+    def _stop_cb(self, button):
+        pass

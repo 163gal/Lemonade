@@ -13,6 +13,10 @@
 #
 #    Author: Justin Lewis  <jlew.blackout@gmail.com>
 
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
 import pygame
 from time import time
 from .GameEngineConsole import GameEngineConsole
@@ -29,7 +33,7 @@ class GameEngine(object):
     """
     instance = None
 
-    def __init__(self, width=1200, height=900, always_draw=False,
+    def __init__(self, width, height, always_draw=False,
                  fps_cap=15, version=False, title="FortuneEngine"):
         """
         Constructor for the game engine.
@@ -255,6 +259,8 @@ class GameEngine(object):
         The main event loop.
         """
         while self.__run_event:
+            while Gtk.events_pending():
+                Gtk.main_iteration()
 
             event = pygame.event.poll()
 
@@ -317,6 +323,7 @@ class GameEngine(object):
 
                     if retur_val:
                         break
+            pygame.display.flip()
 
     def stop_event_loop(self):
         """
