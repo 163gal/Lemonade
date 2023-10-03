@@ -43,16 +43,18 @@ class VteActivity(activity.Activity):
         self._vte = Vte.Terminal()
 
         if DEBUG_TERMINAL:
-            toolbox = ToolbarBox(self)
+            toolbox = ToolbarBox()
             self.set_toolbar_box(toolbox)
 
             self._vte.set_size(30, 5)
             self._vte.set_size_request(200, 300)
             font = 'Monospace 10'
             self._vte.set_font(Pango.FontDescription(font))
-            self._vte.set_colors(Gdk.color_parse('#E7E7E7'),
-                                 Gdk.color_parse('#000000'),
-                                 [])
+            foreground = Gdk.RGBA()
+            foreground.parse('#E7E7E7')
+            background = Gdk.RGBA()
+            background.parse('#000000')
+            self._vte.set_colors(foreground, background, [])
 
             vtebox = Gtk.HBox()
             vtebox.pack_start(self._vte, True, True, 0)
