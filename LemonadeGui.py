@@ -342,8 +342,8 @@ class LemonadeGui(GameEngineElement):
                     len(self.__input_keys[self.game_mode])
 
             # Text input, only handles numbers (ascii 48 - 58)
-            elif event.key >= 48 and event.key <= 58:
-                key = str(event.str)
+            elif event.key >= ord('0') and event.key <= ord('9'):
+                key = str(event.key - ord('0'))
 
                 handle = self.__input_string[self.game_mode][
                             self.__input_mode[self.game_mode]]
